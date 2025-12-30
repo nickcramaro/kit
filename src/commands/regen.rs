@@ -21,23 +21,19 @@ pub fn run(config: &Config) -> Result<()> {
     println!("Wrote {} aliases to {:?}", aliases.len(), shell.aliases_path());
 
     // Create symlinks
-    for (name, _tool) in &config.tools {
+    for (name, tool) in &config.tools {
         if let Ok(path) = which::which(name) {
             // Create symlink for main binary
             shell.create_symlink(name, &path)?;
 
             // Create symlinks for aliases
-            for alias in _tool.aliases() {
+            for alias in tool.aliases() {
                 shell.create_symlink(alias, &path)?;
             }
         }
     }
 
-    // Inject into shell rc
-    shell.inject_rc()?;
-    println!("Updated {:?}", config.config.shell_rc);
-
-    println!("\nRun `source {:?}` or start a new shell to apply changes", config.config.shell_rc);
+    println!("Done. Run `kit setup` if PATH is not configured.");
 
     Ok(())
 }

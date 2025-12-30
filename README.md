@@ -17,7 +17,7 @@ mkdir -p ~/.kit/bin
 cp target/release/kit ~/.kit/bin/
 
 # Set up PATH (run once, then restart shell or source ~/.zshrc)
-~/.kit/bin/kit aliases
+~/.kit/bin/kit setup
 ```
 
 ## Quick Start
@@ -32,20 +32,21 @@ kit add ripgrep
 # Install all configured tools
 kit install --all
 
-# Generate aliases and update your shell
-kit aliases
+# Regenerate aliases and symlinks
+kit regen
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
+| `kit setup` | Check dependencies, inject PATH into shell rc |
 | `kit scan` | Discover binaries in PATH, diff against config |
 | `kit list` | Show configured tools with install status |
 | `kit add <tool>` | Interactively add a tool to config |
 | `kit install [tool]` | Install a specific tool from config |
 | `kit install --all` | Install all tools from config |
-| `kit aliases` | Regenerate aliases and inject into shell rc |
+| `kit regen` | Regenerate aliases and symlinks |
 | `kit export` | Output kit.toml to stdout |
 
 ## Configuration
@@ -94,11 +95,17 @@ Kit supports three tool sources:
 
 ## Shell Integration
 
-Running `kit aliases` will:
+Running `kit setup` will:
+
+1. Check that required tool sources (brew, mise, curl) are installed
+2. Inject a managed block into your `.zshrc`:
+
+Running `kit regen` will:
 
 1. Create `~/.kit/bin/` with symlinks to your tools
 2. Generate `~/.kit/aliases.zsh` with shell aliases
-3. Inject a managed block into your `.zshrc`:
+
+The injected block in `.zshrc`:
 
 ```zsh
 # >>> kit >>>

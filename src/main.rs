@@ -19,6 +19,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Initial setup: check dependencies, inject shell rc
+    Setup,
     /// Discover PATH, diff against config
     Scan,
     /// Show configured tools + install status
@@ -31,8 +33,8 @@ enum Commands {
         #[arg(long)]
         all: bool,
     },
-    /// Regenerate aliases + re-inject into shell rc
-    Aliases,
+    /// Regenerate aliases and symlinks
+    Regen,
     /// Output kit.toml to stdout
     Export,
     /// Detect source, add to config interactively
@@ -57,10 +59,11 @@ fn run() -> anyhow::Result<()> {
     let config = Config::load_or_default();
 
     match cli.command {
+        Commands::Setup => commands::setup::run(&config),
         Commands::Scan => commands::scan::run(&config),
         Commands::List => commands::list::run(&config),
         Commands::Install { tool, all } => commands::install::run(&config, tool, all),
-        Commands::Aliases => commands::aliases::run(&config),
+        Commands::Regen => commands::regen::run(&config),
         Commands::Export => commands::export::run(&config),
         Commands::Add { tool } => commands::add::run(&config, tool),
     }
