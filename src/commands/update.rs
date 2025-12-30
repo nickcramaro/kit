@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Context, Result};
+use colored::Colorize;
 use flate2::read::GzDecoder;
 use serde::Deserialize;
 use std::env;
@@ -73,8 +74,12 @@ fn get_current_exe_dir() -> Result<PathBuf> {
 
 pub fn run() -> Result<()> {
     let current = env!("CARGO_PKG_VERSION");
-    println!("Current version: v{}", current);
-    println!("Checking for updates...");
+    println!(
+        "{} {}",
+        "Current version:".bold(),
+        format!("v{}", current).cyan()
+    );
+    println!("{}", "Checking for updates...".dimmed());
 
     let client = reqwest::blocking::Client::builder()
         .user_agent("kit")
@@ -90,11 +95,15 @@ pub fn run() -> Result<()> {
 
     let latest_clean = release.tag_name.trim_start_matches('v');
     if latest_clean == current {
-        println!("Already up to date!");
+        println!("{} Already up to date!", "\u{2713}".green());
         return Ok(());
     }
 
-    println!("New version available: {}", release.tag_name);
+    println!(
+        "{} {}",
+        "New version available:".yellow(),
+        release.tag_name.green().bold()
+    );
 
     let (os, arch) = get_platform()?;
     let binary_name = format!("kit-{}-{}.tar.gz", os, arch);
@@ -105,7 +114,7 @@ pub fn run() -> Result<()> {
         .find(|a| a.name == binary_name)
         .ok_or_else(|| anyhow!("No binary available for {}-{}", os, arch))?;
 
-    println!("Downloading {}...", binary_name);
+    println!("{} {}...", "Downloading".cyan(), binary_name.dimmed());
 
     let response = client
         .get(&asset.browser_download_url)
@@ -151,6 +160,10 @@ pub fn run() -> Result<()> {
         Ok::<_, std::io::Error>(())
     })?;
 
-    println!("Updated to {}!", release.tag_name);
+    println!(
+        "{} Updated to {}!",
+        "\u{2713}".green(),
+        release.tag_name.green().bold()
+    );
     Ok(())
 }

@@ -1,6 +1,7 @@
 use crate::config::Config;
 use crate::shell::Shell;
 use anyhow::Result;
+use colored::Colorize;
 
 /// Regenerate aliases and symlinks for all configured tools
 pub fn regenerate(config: &Config) -> Result<()> {
@@ -38,7 +39,13 @@ pub fn regenerate(config: &Config) -> Result<()> {
 
 pub fn run(config: &Config) -> Result<()> {
     regenerate(config)?;
-    println!("Regenerated aliases and symlinks.");
-    println!("Run `kit setup` if PATH is not configured.");
+    println!(
+        "{} Regenerated aliases and symlinks.",
+        "\u{2713}".green()
+    );
+    println!(
+        "Run {} if PATH is not configured.",
+        "kit setup".cyan()
+    );
     Ok(())
 }

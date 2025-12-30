@@ -2,6 +2,7 @@ use crate::commands::regen;
 use crate::config::{Config, Tool};
 use crate::scanner::{DetectedSource, Scanner};
 use anyhow::{bail, Result};
+use colored::Colorize;
 use dialoguer::{Confirm, Input, Select};
 
 pub fn run(config: &Config, tool: String) -> Result<()> {
@@ -26,7 +27,7 @@ pub fn run(config: &Config, tool: String) -> Result<()> {
     };
 
     let selection = Select::new()
-        .with_prompt(format!("Select source for '{}'", tool))
+        .with_prompt(format!("Select source for '{}'", tool.cyan()))
         .items(&sources)
         .default(default)
         .interact()?;
@@ -102,8 +103,8 @@ pub fn run(config: &Config, tool: String) -> Result<()> {
     };
 
     // Confirm and save
-    println!("\nWill add to kit.toml:");
-    println!("  [tools.{}]", tool);
+    println!("\n{}", "Will add to kit.toml:".bold());
+    println!("  {}", format!("[tools.{}]", tool).cyan());
     println!("  {:?}", new_tool);
 
     if Confirm::new()
@@ -115,10 +116,17 @@ pub fn run(config: &Config, tool: String) -> Result<()> {
         config.tools.insert(tool.clone(), new_tool);
         config.save()?;
         regen::regenerate(&config)?;
-        println!("\n\u{2713} Added '{}' to kit.toml", tool);
-        println!("Run `kit install {}` to install it", tool);
+        println!(
+            "\n{} Added '{}' to kit.toml",
+            "\u{2713}".green(),
+            tool.green().bold()
+        );
+        println!(
+            "Run {} to install it",
+            format!("kit install {}", tool).cyan()
+        );
     } else {
-        println!("Cancelled");
+        println!("{}", "Cancelled".yellow());
     }
 
     Ok(())

@@ -2,6 +2,7 @@ use crate::commands::regen;
 use crate::config::{Config, Tool};
 use crate::sources::{brew::Brew, curl::Curl, mise::Mise};
 use anyhow::{bail, Result};
+use colored::Colorize;
 
 pub fn run(config: &Config, tool: Option<String>, all: bool) -> Result<()> {
     if all {
@@ -18,21 +19,27 @@ fn install_all(config: &Config) -> Result<()> {
     let mut failed = 0;
 
     for (name, tool) in &config.tools {
-        print!("Installing {}... ", name);
+        print!("{} {}... ", "Installing".cyan(), name.bold());
         match install_tool(name, tool) {
             Ok(()) => {
-                println!("\u{2713}");
+                println!("{}", "\u{2713}".green());
                 success += 1;
             }
             Err(e) => {
-                println!("\u{2717} {}", e);
+                println!("{} {}", "\u{2717}".red(), e.to_string().red());
                 failed += 1;
             }
         }
     }
 
     regen::regenerate(config)?;
-    println!("\nInstalled: {}, Failed: {}", success, failed);
+    println!(
+        "\n{}: {}, {}: {}",
+        "Installed".green(),
+        success.to_string().green().bold(),
+        "Failed".red(),
+        failed.to_string().red().bold()
+    );
     Ok(())
 }
 
@@ -44,7 +51,11 @@ fn install_one(config: &Config, name: &str) -> Result<()> {
 
     install_tool(name, tool)?;
     regen::regenerate(config)?;
-    println!("\u{2713} {} installed successfully", name);
+    println!(
+        "{} {} installed successfully",
+        "\u{2713}".green(),
+        name.green().bold()
+    );
     Ok(())
 }
 

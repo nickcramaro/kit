@@ -1,6 +1,7 @@
 use crate::config::{Config, Tool};
 use crate::shell::Shell;
 use anyhow::{bail, Result};
+use colored::Colorize;
 use std::collections::HashSet;
 
 pub fn run(config: &Config) -> Result<()> {
@@ -8,20 +9,33 @@ pub fn run(config: &Config) -> Result<()> {
 
     // Check if config exists
     if !config_path.exists() {
-        println!("No config found at {:?}", config_path);
-        println!("Run `kit add <tool>` to add your first tool.\n");
+        println!("{} {:?}", "No config found at".yellow(), config_path);
+        println!(
+            "Run {} to add your first tool.\n",
+            "kit add <tool>".cyan()
+        );
     } else {
-        println!("Config: {:?}", config_path);
-        println!("Tools configured: {}\n", config.tools.len());
+        println!("{} {:?}", "Config:".bold(), config_path);
+        println!(
+            "{} {}\n",
+            "Tools configured:".bold(),
+            config.tools.len().to_string().cyan()
+        );
     }
 
     // Collect required sources from configured tools
     let mut required_sources: HashSet<&str> = HashSet::new();
     for tool in config.tools.values() {
         match tool {
-            Tool::Brew { .. } => { required_sources.insert("brew"); }
-            Tool::Mise { .. } => { required_sources.insert("mise"); }
-            Tool::Curl { .. } => { required_sources.insert("curl"); }
+            Tool::Brew { .. } => {
+                required_sources.insert("brew");
+            }
+            Tool::Mise { .. } => {
+                required_sources.insert("mise");
+            }
+            Tool::Curl { .. } => {
+                required_sources.insert("curl");
+            }
         }
     }
 
@@ -34,7 +48,7 @@ pub fn run(config: &Config) -> Result<()> {
     }
 
     if !missing.is_empty() {
-        println!("Missing dependencies:");
+        println!("{}", "Missing dependencies:".red().bold());
         for dep in &missing {
             let install_hint = match *dep {
                 "brew" => "Install from https://brew.sh",
@@ -42,14 +56,21 @@ pub fn run(config: &Config) -> Result<()> {
                 "curl" => "Install via your system package manager",
                 _ => "",
             };
-            println!("  {} - {}", dep, install_hint);
+            println!("  {} - {}", dep.red(), install_hint.dimmed());
         }
         println!();
         bail!("Install missing dependencies and run `kit setup` again");
     }
 
     if !required_sources.is_empty() {
-        println!("Dependencies OK: {}", required_sources.into_iter().collect::<Vec<_>>().join(", "));
+        println!(
+            "{} {}",
+            "\u{2713} Dependencies OK:".green(),
+            required_sources
+                .into_iter()
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
     }
 
     // Inject into shell rc
@@ -59,9 +80,13 @@ pub fn run(config: &Config) -> Result<()> {
     );
 
     shell.inject_rc()?;
-    println!("Updated {:?}", config.config.shell_rc);
+    println!("{} {:?}", "\u{2713} Updated".green(), config.config.shell_rc);
 
-    println!("\nSetup complete! Run `source {:?}` or start a new shell.", config.config.shell_rc);
+    println!(
+        "\n{} Run {} or start a new shell.",
+        "Setup complete!".green().bold(),
+        format!("source {:?}", config.config.shell_rc).cyan()
+    );
 
     Ok(())
 }
