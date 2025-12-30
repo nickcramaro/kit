@@ -7,18 +7,44 @@ use thiserror::Error;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Config {
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "GlobalConfig::is_default")]
     pub config: GlobalConfig,
     #[serde(default)]
     pub tools: HashMap<String, Tool>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct GlobalConfig {
     #[serde(default = "default_bin_dir")]
     pub bin_dir: PathBuf,
     #[serde(default = "default_shell_rc")]
     pub shell_rc: PathBuf,
+}
+
+impl Default for GlobalConfig {
+    fn default() -> Self {
+        Self {
+            bin_dir: default_bin_dir(),
+            shell_rc: default_shell_rc(),
+        }
+    }
+}
+
+impl GlobalConfig {
+    /// Check if this config equals the default (for skip_serializing_if)
+    fn is_default(&self) -> bool {
+        *self == Self::default()
+    }
+
+    /// Normalize empty paths to defaults (fixes configs saved with bug)
+    pub fn normalize(&mut self) {
+        if self.bin_dir.as_os_str().is_empty() {
+            self.bin_dir = default_bin_dir();
+        }
+        if self.shell_rc.as_os_str().is_empty() {
+            self.shell_rc = default_shell_rc();
+        }
+    }
 }
 
 fn default_bin_dir() -> PathBuf {
@@ -92,7 +118,9 @@ impl Config {
             return Err(ConfigError::NotFound(path.clone()));
         }
         let contents = fs::read_to_string(path)?;
-        let config: Config = toml::from_str(&contents)?;
+        let mut config: Config = toml::from_str(&contents)?;
+        // Fix configs saved with empty paths (bug in earlier versions)
+        config.config.normalize();
         Ok(config)
     }
 

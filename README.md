@@ -13,7 +13,11 @@ A CLI tool for tracking, installing, and managing your command-line tools.
 
 ```bash
 cargo build --release
-cp target/release/kit ~/.local/bin/
+mkdir -p ~/.kit/bin
+cp target/release/kit ~/.kit/bin/
+
+# Set up PATH (run once, then restart shell or source ~/.zshrc)
+~/.kit/bin/kit aliases
 ```
 
 ## Quick Start
