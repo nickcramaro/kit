@@ -14,7 +14,7 @@ use config::Config;
 #[command(long_about = None)]
 struct Cli {
     #[command(subcommand)]
-    command: Commands,
+    command: Option<Commands>,
 }
 
 #[derive(Subcommand)]
@@ -42,6 +42,8 @@ enum Commands {
         /// Tool name to add
         tool: String,
     },
+    /// Update kit to the latest version
+    Update,
 }
 
 fn main() {
@@ -54,17 +56,35 @@ fn main() {
     }
 }
 
+fn check_for_updates() {
+    if let Ok(Some(version)) = commands::update::check_for_update() {
+        eprintln!(
+            "\n\x1b[33m📦 New version available: {}\x1b[0m",
+            version
+        );
+        eprintln!("   Run \x1b[1mkit update\x1b[0m to upgrade\n");
+    }
+}
+
 fn run() -> anyhow::Result<()> {
     let cli = Cli::parse();
     let config = Config::load_or_default();
 
     match cli.command {
-        Commands::Setup => commands::setup::run(&config),
-        Commands::Scan => commands::scan::run(&config),
-        Commands::List => commands::list::run(&config),
-        Commands::Install { tool, all } => commands::install::run(&config, tool, all),
-        Commands::Regen => commands::regen::run(&config),
-        Commands::Export => commands::export::run(&config),
-        Commands::Add { tool } => commands::add::run(&config, tool),
+        None => {
+            check_for_updates();
+            Cli::parse_from(["kit", "--help"]);
+            Ok(())
+        }
+        Some(cmd) => match cmd {
+            Commands::Setup => commands::setup::run(&config),
+            Commands::Scan => commands::scan::run(&config),
+            Commands::List => commands::list::run(&config),
+            Commands::Install { tool, all } => commands::install::run(&config, tool, all),
+            Commands::Regen => commands::regen::run(&config),
+            Commands::Export => commands::export::run(&config),
+            Commands::Add { tool } => commands::add::run(&config, tool),
+            Commands::Update => commands::update::run(),
+        },
     }
 }
