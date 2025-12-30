@@ -47,11 +47,6 @@ pub fn run(config: &Config) -> anyhow::Result<()> {
     if !unconfigured.is_empty() {
         println!("Found but not in config:");
         for binary in unconfigured.iter().take(20) {
-            let source_str = match binary.source {
-                DetectedSource::Brew => "brew",
-                DetectedSource::Mise => "mise",
-                DetectedSource::Unknown => "unknown",
-            };
             println!(
                 "  ? {} ({}) - run `kit add {}`",
                 binary.name,
