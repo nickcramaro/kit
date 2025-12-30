@@ -1,0 +1,42 @@
+# Kit configuration example
+# Copy to ~/.config/kit/kit.toml
+
+[config]
+bin_dir = "~/.kit/bin"
+shell_rc = "~/.zshrc"
+
+# Homebrew tools
+[tools.ripgrep]
+source = "brew"
+aliases = ["rg"]
+
+[tools.bat]
+source = "brew"
+aliases = ["cat"]
+
+[tools.fd]
+source = "brew"
+
+[tools.eza]
+source = "brew"
+aliases = ["ls", "ll"]
+
+# Mise-managed tools
+[tools.python]
+source = "mise"
+version = "3.12"
+
+[tools.node]
+source = "mise"
+version = "20"
+
+# Curl install scripts
+[tools.starship]
+source = "curl"
+install_url = "https://starship.rs/install.sh"
+binary = "starship"
+
+[tools.rustup]
+source = "curl"
+install_url = "https://sh.rustup.rs"
+binary = "rustup"
