@@ -1,3 +1,4 @@
+use crate::commands::regen;
 use crate::config::{Config, Tool};
 use crate::scanner::{DetectedSource, Scanner};
 use anyhow::{bail, Result};
@@ -113,6 +114,7 @@ pub fn run(config: &Config, tool: String) -> Result<()> {
         let mut config = config.clone();
         config.tools.insert(tool.clone(), new_tool);
         config.save()?;
+        regen::regenerate(&config)?;
         println!("\n\u{2713} Added '{}' to kit.toml", tool);
         println!("Run `kit install {}` to install it", tool);
     } else {

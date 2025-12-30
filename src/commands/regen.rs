@@ -2,7 +2,8 @@ use crate::config::Config;
 use crate::shell::Shell;
 use anyhow::Result;
 
-pub fn run(config: &Config) -> Result<()> {
+/// Regenerate aliases and symlinks for all configured tools
+pub fn regenerate(config: &Config) -> Result<()> {
     let shell = Shell::new(
         config.config.bin_dir.parent().unwrap().to_path_buf(),
         config.config.shell_rc.clone(),
@@ -18,7 +19,6 @@ pub fn run(config: &Config) -> Result<()> {
 
     // Write aliases file
     shell.write_aliases(&aliases)?;
-    println!("Wrote {} aliases to {:?}", aliases.len(), shell.aliases_path());
 
     // Create symlinks
     for (name, tool) in &config.tools {
@@ -33,7 +33,12 @@ pub fn run(config: &Config) -> Result<()> {
         }
     }
 
-    println!("Done. Run `kit setup` if PATH is not configured.");
+    Ok(())
+}
 
+pub fn run(config: &Config) -> Result<()> {
+    regenerate(config)?;
+    println!("Regenerated aliases and symlinks.");
+    println!("Run `kit setup` if PATH is not configured.");
     Ok(())
 }

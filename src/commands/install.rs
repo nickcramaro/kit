@@ -1,3 +1,4 @@
+use crate::commands::regen;
 use crate::config::{Config, Tool};
 use crate::sources::{brew::Brew, curl::Curl, mise::Mise};
 use anyhow::{bail, Result};
@@ -30,6 +31,7 @@ fn install_all(config: &Config) -> Result<()> {
         }
     }
 
+    regen::regenerate(config)?;
     println!("\nInstalled: {}, Failed: {}", success, failed);
     Ok(())
 }
@@ -41,6 +43,7 @@ fn install_one(config: &Config, name: &str) -> Result<()> {
         .ok_or_else(|| anyhow::anyhow!("Tool '{}' not found in config", name))?;
 
     install_tool(name, tool)?;
+    regen::regenerate(config)?;
     println!("\u{2713} {} installed successfully", name);
     Ok(())
 }
