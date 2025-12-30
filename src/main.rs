@@ -21,8 +21,6 @@ struct Cli {
 enum Commands {
     /// Initial setup: check dependencies, inject shell rc
     Setup,
-    /// Discover PATH, diff against config
-    Scan,
     /// Show configured tools + install status
     List,
     /// Install using source from config
@@ -78,7 +76,6 @@ fn run() -> anyhow::Result<()> {
         }
         Some(cmd) => match cmd {
             Commands::Setup => commands::setup::run(&config),
-            Commands::Scan => commands::scan::run(&config),
             Commands::List => commands::list::run(&config),
             Commands::Install { tool, all } => commands::install::run(&config, tool, all),
             Commands::Regen => commands::regen::run(&config),
