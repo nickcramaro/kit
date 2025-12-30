@@ -1,3 +1,4 @@
+use serde::de::Error as _;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
@@ -97,6 +98,21 @@ impl Config {
 
     pub fn load_or_default() -> Self {
         Self::load().unwrap_or_default()
+    }
+
+    pub fn save(&self) -> Result<(), ConfigError> {
+        let path = Self::config_path();
+        self.save_to(&path)
+    }
+
+    pub fn save_to(&self, path: &PathBuf) -> Result<(), ConfigError> {
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        let contents = toml::to_string_pretty(self)
+            .map_err(|e| ConfigError::Parse(toml::de::Error::custom(e.to_string())))?;
+        std::fs::write(path, contents)?;
+        Ok(())
     }
 }
 
