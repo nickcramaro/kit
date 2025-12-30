@@ -1,5 +1,5 @@
-mod config;
 mod commands;
+mod config;
 mod scanner;
 mod shell;
 mod sources;
@@ -9,7 +9,9 @@ use config::Config;
 
 #[derive(Parser)]
 #[command(name = "kit")]
-#[command(about = "CLI Tool Manager", long_about = None)]
+#[command(version)]
+#[command(about = "CLI Tool Manager - track, install, and manage your command-line tools")]
+#[command(long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -40,7 +42,17 @@ enum Commands {
     },
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() {
+    if let Err(e) = run() {
+        eprintln!("Error: {}", e);
+        for cause in e.chain().skip(1) {
+            eprintln!("  Caused by: {}", cause);
+        }
+        std::process::exit(1);
+    }
+}
+
+fn run() -> anyhow::Result<()> {
     let cli = Cli::parse();
     let config = Config::load_or_default();
 
