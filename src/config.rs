@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs;
 use std::path::PathBuf;
+use thiserror::Error;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Config {
@@ -61,9 +63,70 @@ impl Tool {
     }
 }
 
+#[derive(Debug, Error)]
+pub enum ConfigError {
+    #[error("Failed to read config file: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("Failed to parse config: {0}")]
+    Parse(#[from] toml::de::Error),
+    #[error("Config file not found at {0}")]
+    NotFound(PathBuf),
+}
+
+impl Config {
+    pub fn config_path() -> PathBuf {
+        dirs::config_dir()
+            .unwrap_or_else(|| PathBuf::from("."))
+            .join("kit")
+            .join("kit.toml")
+    }
+
+    pub fn load() -> Result<Self, ConfigError> {
+        let path = Self::config_path();
+        Self::load_from(&path)
+    }
+
+    pub fn load_from(path: &PathBuf) -> Result<Self, ConfigError> {
+        if !path.exists() {
+            return Err(ConfigError::NotFound(path.clone()));
+        }
+        let contents = fs::read_to_string(path)?;
+        let config: Config = toml::from_str(&contents)?;
+        Ok(config)
+    }
+
+    pub fn load_or_default() -> Self {
+        Self::load().unwrap_or_default()
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            config: GlobalConfig::default(),
+            tools: HashMap::new(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    #[test]
+    fn test_load_from_file() {
+        let mut file = NamedTempFile::new().unwrap();
+        writeln!(file, r#"
+[tools.ripgrep]
+source = "brew"
+aliases = ["rg"]
+"#).unwrap();
+
+        let config = Config::load_from(&file.path().to_path_buf()).unwrap();
+        assert!(config.tools.contains_key("ripgrep"));
+    }
 
     #[test]
     fn test_parse_minimal_config() {

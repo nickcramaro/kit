@@ -259,6 +259,7 @@ dependencies = [
  "dialoguer",
  "dirs",
  "serde",
+ "tempfile",
  "thiserror",
  "toml",
  "walkdir",
