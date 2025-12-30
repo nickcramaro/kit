@@ -12,11 +12,15 @@ A CLI tool for tracking, installing, and managing your command-line tools.
 ## Installation
 
 ```bash
+curl -fsSL https://raw.githubusercontent.com/nickcramaro/kit/main/install.sh | bash
+```
+
+Or manually:
+
+```bash
 cargo build --release
 mkdir -p ~/.kit/bin
 cp target/release/kit ~/.kit/bin/
-
-# Set up PATH (run once, then restart shell or source ~/.zshrc)
 ~/.kit/bin/kit setup
 ```
 
