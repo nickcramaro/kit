@@ -1,6 +1,7 @@
 mod config;
 mod commands;
 mod scanner;
+mod shell;
 mod sources;
 
 use clap::{Parser, Subcommand};
