@@ -102,8 +102,9 @@ pub enum ConfigError {
 
 impl Config {
     pub fn config_path() -> PathBuf {
-        dirs::config_dir()
+        dirs::home_dir()
             .unwrap_or_else(|| PathBuf::from("."))
+            .join(".config")
             .join("kit")
             .join("kit.toml")
     }
