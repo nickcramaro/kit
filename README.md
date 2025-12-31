@@ -27,9 +27,6 @@ cp target/release/kit ~/.kit/bin/
 ## Quick Start
 
 ```bash
-# Scan your PATH to see what's installed
-kit scan
-
 # Add a tool interactively
 kit add ripgrep
 
@@ -45,13 +42,13 @@ kit regen
 | Command | Description |
 |---------|-------------|
 | `kit setup` | Check dependencies, inject PATH into shell rc |
-| `kit scan` | Discover binaries in PATH, diff against config |
 | `kit list` | Show configured tools with install status |
 | `kit add <tool>` | Interactively add a tool to config |
 | `kit install [tool]` | Install a specific tool from config |
 | `kit install --all` | Install all tools from config |
 | `kit regen` | Regenerate aliases and symlinks |
 | `kit export` | Output kit.toml to stdout |
+| `kit update` | Update kit to the latest version |
 
 ## Configuration
 
