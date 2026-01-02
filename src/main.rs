@@ -4,14 +4,21 @@ mod scanner;
 mod shell;
 mod sources;
 
-use clap::{Parser, Subcommand};
+use clap::{builder::styling, Parser, Subcommand};
 use config::Config;
+
+const STYLES: styling::Styles = styling::Styles::styled()
+    .header(styling::AnsiColor::Green.on_default().bold())
+    .usage(styling::AnsiColor::Green.on_default().bold())
+    .literal(styling::AnsiColor::Cyan.on_default().bold())
+    .placeholder(styling::AnsiColor::Yellow.on_default());
 
 #[derive(Parser)]
 #[command(name = "kit")]
 #[command(version)]
 #[command(about = "CLI Tool Manager - track, install, and manage your command-line tools")]
 #[command(long_about = None)]
+#[command(styles = STYLES)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
