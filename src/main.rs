@@ -5,6 +5,7 @@ mod shell;
 mod sources;
 
 use clap::{builder::styling, Parser, Subcommand};
+use colored::*;
 use config::Config;
 
 const STYLES: styling::Styles = styling::Styles::styled()
@@ -51,6 +52,20 @@ enum Commands {
     Update,
 }
 
+fn print_banner() {
+    println!(
+        "{}",
+        r#"  _    _ _
+ | | _(_) |_
+ | |/ / | __|
+ |   <| | |_
+ |_|\_\_|\__|"#
+            .green()
+            .bold()
+    );
+    println!();
+}
+
 fn main() {
     if let Err(e) = run() {
         eprintln!("Error: {}", e);
@@ -77,18 +92,51 @@ fn run() -> anyhow::Result<()> {
 
     match cli.command {
         None => {
+            print_banner();
+            let tool_count = config.tools.len();
+            let installed = config
+                .tools
+                .keys()
+                .filter(|name| which::which(name).is_ok())
+                .count();
+            println!(
+                "  {} {}",
+                "Tools:".white().bold(),
+                format!("{}/{} installed", installed, tool_count).cyan()
+            );
+            println!(
+                "  {} {}",
+                "Config:".white().bold(),
+                Config::config_path().display().to_string().cyan()
+            );
+            println!(
+                "  {} {}",
+                "Version:".white().bold(),
+                env!("CARGO_PKG_VERSION").cyan()
+            );
+            println!();
+            println!(
+                "  Run {} for available commands.",
+                "kit --help".cyan().bold()
+            );
+            println!();
             check_for_updates();
-            Cli::parse_from(["kit", "--help"]);
             Ok(())
         }
-        Some(cmd) => match cmd {
-            Commands::Setup => commands::setup::run(&config),
-            Commands::List => commands::list::run(&config),
-            Commands::Install { tool, all } => commands::install::run(&config, tool, all),
-            Commands::Regen => commands::regen::run(&config),
-            Commands::Export => commands::export::run(&config),
-            Commands::Add { tool } => commands::add::run(&config, tool),
-            Commands::Update => commands::update::run(),
-        },
+        Some(cmd) => {
+            match &cmd {
+                Commands::Setup | Commands::List => print_banner(),
+                _ => {}
+            }
+            match cmd {
+                Commands::Setup => commands::setup::run(&config),
+                Commands::List => commands::list::run(&config),
+                Commands::Install { tool, all } => commands::install::run(&config, tool, all),
+                Commands::Regen => commands::regen::run(&config),
+                Commands::Export => commands::export::run(&config),
+                Commands::Add { tool } => commands::add::run(&config, tool),
+                Commands::Update => commands::update::run(),
+            }
+        }
     }
 }
